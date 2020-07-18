@@ -1,5 +1,4 @@
 ---
-
 - hosts: Centos_Samuel
   become: true
   remote_user: vagrant
@@ -9,56 +8,70 @@
     server3: 1.south-america.pool.ntp.org
     _hostname: centos1-samuel
   tasks:
+    - name: Actualizar
+      yum:
+        name: "*"
+        state: latest
 
-  - name: Actualizar
-    yum:
-      name: '*'
-      state: latest
+    - name: Cambiar hostname
+      hostname:
+        name: "{{ _hostname  }}"
 
-  - name: Cambiar hostname
-    hostname:
-      name: "{{ _hostname  }}"
-  - name: Modificar /etc/hosts
-    template:
-      src: templates/hosts.j2
-      dest: /etc/hosts
+    - name: Modificar /etc/hosts
+      template:
+        src: templates/hosts.j2
+        dest: /etc/hosts
+        owner: root
+        group: root
+        mode: 0644
+        backup: yes
 
-  - name: Instalaciones
-    yum:
-      name:
-        - epel-release
-        - nmap
-        - vim
-        - ntp
-        - nginx
-      state: latest
+    - name: Instalar epel
+      yum:
+        name: epel-release
+        state: latest
 
-  - name: Servicio ntp
-    template:
-      src: templates/ntp.j2
-      dest: /etc/ntp.conf
-      owner: root
-      group: root
-      mode: 0644
-      backup: yes
-    notify: Reiniciar ntpd
+    - name: Instalaciones
+      yum:
+        name:
+          - fail2ban-all
+          - nmap
+          - vim
+          - ntp
+          - nginx
+        state: latest
 
-  - name: Zona horaria
-    shell: |
-      timedatectl set-timezone America/Bogota
-      timedatectl set-local-rtc 0
-      timedatectl set-ntp 1
+    - name: Servicio ntp
+      template:
+        src: templates/ntp.j2
+        dest: /etc/ntp.conf
+        owner: root
+        group: root
+        mode: 0644
+        backup: yes
+      notify: Reiniciar ntpd
 
-  - name: Habilitar servidor web
-    template:
-      src: templates/index.html
-      dest: /usr/share/nginx/html/index.html
-    notify: Reiniciar nginx
+    - name: Zona horaria
+      shell: |
+        timedatectl set-timezone America/Bogota
+        timedatectl set-local-rtc 0
+        timedatectl set-ntp 1
 
-  - name: Instalar fail2ban
-    yum:
-      name: fail2ban-all
-      state: latest
+    - name: Habilitar servidor web
+      template:
+        src: templates/index.html
+        dest: /usr/share/nginx/html/index.html
+      notify: Reiniciar nginx
+
+    - name: Configurar fail2ban
+      template:
+        src: templates/sshd.local
+        dest: /etc/fail2ban/jail.d/sshd.local
+        owner: root
+        group: root
+        mode: 0644
+        backup: yes
+      notify: Reiniciar fail2ban
 
   handlers:
     - name: Reiniciar ntpd
@@ -70,5 +83,11 @@
     - name: Reiniciar nginx
       service:
         name: nginx
+        state: restarted
+        enabled: yes
+
+    - name: Reiniciar fail2ban
+      service:
+        name: fail2ban
         state: restarted
         enabled: yes
