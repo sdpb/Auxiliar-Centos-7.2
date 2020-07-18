@@ -7,6 +7,7 @@
     server1: 2.co.pool.ntp.org
     server2: 2.south-america.pool.ntp.org
     server3: 1.south-america.pool.ntp.org
+    _hostname: centos1-samuel
   tasks:
 
   - name: Actualizar
@@ -16,8 +17,11 @@
 
   - name: Cambiar hostname
     hostname:
-      name: centos1-samuel
-    notify: Modificar /etc/hosts
+      name: "{{ _hostname  }}"
+  - name: Modificar /etc/hosts
+    template:
+      src: hosts.j2
+      dest: /etc/hosts
 
   - name: Instalaciones
     yum:
@@ -26,9 +30,10 @@
         - nmap
         - vim
         - ntp
+        - nginx
       state: latest
 
-  - name: servicio ntp
+  - name: Servicio ntp
     template:
       src: templates/ntp.j2
       dest: /etc/ntp.conf
@@ -44,6 +49,12 @@
       timedatectl set-local-rtc 0
       timedatectl set-ntp 1
 
+  - name: Habilitar servidor web
+    template:
+      src: index.html
+      dest: /usr/share/nginx/html/index.html
+    notify: Reiniciar nginx
+
   - name: Instalar fail2ban
     yum:
       name: fail2ban-all
@@ -55,5 +66,9 @@
         name: ntpd
         state: restarted
         enabled: yes
-    - name: Modificar /etc/hosts
-      shell: echo hola
+
+    - name: Reiniciar nginx
+      service:
+        name: nginx
+        state: restarted
+        enabled: yes
