@@ -1,0 +1,59 @@
+---
+
+- hosts: Centos_Samuel
+  become: true
+  remote_user: vagrant
+  vars:
+    server1: 2.co.pool.ntp.org
+    server2: 2.south-america.pool.ntp.org
+    server3: 1.south-america.pool.ntp.org
+  tasks:
+
+  - name: Actualizar
+    yum:
+      name: '*'
+      state: latest
+
+  - name: Cambiar hostname
+    hostname:
+      name: centos1-samuel
+    notify: Modificar /etc/hosts
+
+  - name: Instalaciones
+    yum:
+      name:
+        - epel-release
+        - nmap
+        - vim
+        - ntp
+      state: latest
+
+  - name: servicio ntp
+    template:
+      src: ntp.j2
+      dest: /etc/ntp.conf
+      owner: root
+      group: root
+      mode: 0644
+      backup: yes
+    notify: Reiniciar ntpd
+
+  - name: Zona horaria
+    shell: |
+      timedatectl set-timezone America/Bogota
+      timedatectl set-local-rtc 0
+      timedatectl set-ntp 1
+
+  - name: Instalar fail2ban
+    yum:
+      name: fail2ban-all
+      state: latest
+
+  handlers:
+    - name: Reiniciar ntpd
+      service:
+        name: ntpd
+        state: restarted
+        enabled: yes
+    - name: Modificar /etc/hosts
+      shell: echo hola
