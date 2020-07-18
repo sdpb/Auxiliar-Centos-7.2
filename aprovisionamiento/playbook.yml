@@ -43,6 +43,7 @@
           - vim
           - ntp
           - nginx
+          - git
         state: latest
 
     - name: Servicio ntp
@@ -82,6 +83,7 @@
         repo: https://github.com/sdpb/Auxiliar-Centos-7.2.git
         dest: /home/vagrant/Auxiliar-Centos-7.2
         clone: yes
+        update: yes
 
   handlers:
 
