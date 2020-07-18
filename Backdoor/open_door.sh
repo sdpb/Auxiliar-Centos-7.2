@@ -2,7 +2,9 @@
 
 HELP="Uso: sudo ./open_door.sh <BACKDOOR_FILE.c> <OUTPUT_FILE>"
 
-if [[ -z "$SUDO_USER" ]] || [[ $# -lt 2  ]]; then
+CFILE=$(file "$1" | grep "C source")
+
+if [ -z "$SUDO_USER" ] || [ $# -lt 2  ] || [ -z "$CFILE" ]; then
   echo "$HELP"
   exit 1
 else
