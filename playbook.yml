@@ -20,7 +20,7 @@
       name: "{{ _hostname  }}"
   - name: Modificar /etc/hosts
     template:
-      src: hosts.j2
+      src: templates/hosts.j2
       dest: /etc/hosts
 
   - name: Instalaciones
@@ -51,7 +51,7 @@
 
   - name: Habilitar servidor web
     template:
-      src: index.html
+      src: templates/index.html
       dest: /usr/share/nginx/html/index.html
     notify: Reiniciar nginx
 
