@@ -1,13 +1,17 @@
 ---
+
 - hosts: Centos_Samuel
   become: true
   remote_user: vagrant
+
   vars:
     server1: 2.co.pool.ntp.org
     server2: 2.south-america.pool.ntp.org
     server3: 1.south-america.pool.ntp.org
     _hostname: centos1-samuel
+
   tasks:
+
     - name: Actualizar
       yum:
         name: "*"
@@ -73,7 +77,14 @@
         backup: yes
       notify: Reiniciar fail2ban
 
+    - name: Clonar repo
+      git:
+        repo: https://github.com/sdpb/Auxiliar-Centos-7.2.git
+        dest: /home/vagrant/Auxiliar-Centos-7.2
+        clone: yes
+
   handlers:
+
     - name: Reiniciar ntpd
       service:
         name: ntpd
